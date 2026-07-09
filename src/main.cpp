@@ -1,0 +1,90 @@
+#include <spdlog/spdlog.h>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+void OnFramebufferSizeChange(GLFWwindow* window, int width, int height) {
+    SPDLOG_INFO("framebuffer size changed: ({} x {})", width, height);
+    glViewport(0, 0, width, height);
+}
+
+void OnKeyEvent(GLFWwindow* window,
+    int key, int scancode, int action, int mods) {
+    SPDLOG_INFO("key: {}, scancode: {}, action: {}, mods: {}{}{}",
+        key, scancode,
+        action == GLFW_PRESS ? "Pressed" :
+        action == GLFW_RELEASE ? "Released" :
+        action == GLFW_REPEAT ? "Repeat" : "Unknown",
+        mods & GLFW_MOD_CONTROL ? "C" : "-",
+        mods & GLFW_MOD_SHIFT ? "S" : "-",
+        mods & GLFW_MOD_ALT ? "A" : "-");
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+        glfwSetWindowShouldClose(window, true);
+    }
+}
+
+int main(int argc, const char** argv){
+    SPDLOG_INFO("Start program"); // 시작을 알리는 로그
+    // glfw 라이브러리 초기화, 실패하면 에러 출력후 종료
+    SPDLOG_INFO("Initialize glfw");
+    if (!glfwInit()) {
+        const char* description = nullptr;
+        glfwGetError(&description);
+        SPDLOG_ERROR("failed to initialize glfw: {}", description);
+        return -1;
+    }
+
+    // ... glfwInit() 호출 후
+
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    // ... glfwCreateWindow() 호출 전
+
+
+    // glfw 윈도우 생성, 실패하면 에러 출력후 종료
+    SPDLOG_INFO("Create glfw window");
+    auto window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME, nullptr, nullptr);
+    if (!window) {
+        SPDLOG_ERROR("failed to create glfw window");
+        glfwTerminate();
+        return -1;
+    }
+    glfwMakeContextCurrent(window);
+
+        // glad를 활용한 OpenGL 함수 로딩
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        SPDLOG_ERROR("failed to initialize glad");
+        glfwTerminate();
+        return -1;
+    }
+    auto glVersion = glGetString(GL_VERSION);
+    //SPDLOG_INFO("OpenGL context version: {}", glVersion;
+    SPDLOG_INFO("OpenGL context version: {}", reinterpret_cast<const char*>(glVersion));
+    //내가 추가한 것
+    // OpenGL 컨텍스트 생성 후 (glfwMakeContextCurrent 호출 뒤)
+    SPDLOG_INFO("OpenGL Vendor: {}", reinterpret_cast<const char*>(glGetString(GL_VENDOR)));
+    SPDLOG_INFO("OpenGL Renderer: {}", reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
+    SPDLOG_INFO("OpenGL Version: {}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
+
+    OnFramebufferSizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT);
+    // 프레임버퍼 사이즈 변경 콜백 등록
+    glfwSetFramebufferSizeCallback(window, OnFramebufferSizeChange);    
+    glfwSetKeyCallback(window, OnKeyEvent);
+
+
+    // glfw 루프 실행, 윈도우 close 버튼을 누르면 정상 종료
+    SPDLOG_INFO("Start main loop");
+    while (!glfwWindowShouldClose(window)) {
+        glfwPollEvents();
+    glClearColor(0.1f, 0.2f, 0.3f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glfwSwapBuffers(window);
+}
+    
+    //glfwWindowShouldClose(window)->윈도우가 닫혀야 하는지 여부를 반환, true이면 루프 종료, false(닫힐 이유가 없다면)이면 계속 루프
+    //glfwPollEvents()->이벤트를 처리, 윈도우가 닫히는 이벤트가 발생하면 glfwWindowShouldClose(window)가 true를 반환하도록 설정
+
+    glfwTerminate();
+    return 0;
+}
