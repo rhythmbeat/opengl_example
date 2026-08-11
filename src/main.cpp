@@ -1,5 +1,4 @@
-#include "common.h"
-#include "shader.h"
+#include "context.h"
 
 #include <spdlog/spdlog.h>
 #include <glad/glad.h>
@@ -70,10 +69,12 @@ int main(int argc, const char** argv){
     SPDLOG_INFO("OpenGL Renderer: {}", reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
     SPDLOG_INFO("OpenGL Version: {}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
 
-    auto vertexShader = Shader::CreateFromFile("./shader/simple.vs", GL_VERTEX_SHADER);
-    auto fragmentShader = Shader::CreateFromFile("./shader/simple.fs", GL_FRAGMENT_SHADER);
-    SPDLOG_INFO("vertex shader id: {}", vertexShader->Get());
-    SPDLOG_INFO("fragment shader id: {}", fragmentShader->Get());
+    auto context = Context::Create();
+        if (!context) {
+            SPDLOG_ERROR("failed to create context");
+            glfwTerminate();
+            return -1;
+        }
 
     OnFramebufferSizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT);
     // 프레임버퍼 사이즈 변경 콜백 등록
@@ -85,11 +86,11 @@ int main(int argc, const char** argv){
     SPDLOG_INFO("Start main loop");
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
-    glClearColor(0.1f, 0.2f, 0.3f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glfwSwapBuffers(window);
+        context->Render();
+        glfwSwapBuffers(window);
 }
-    
+    context.reset();
+    //다른방법 context = nullptr;
     //glfwWindowShouldClose(window)->윈도우가 닫혀야 하는지 여부를 반환, true이면 루프 종료, false(닫힐 이유가 없다면)이면 계속 루프
     //glfwPollEvents()->이벤트를 처리, 윈도우가 닫히는 이벤트가 발생하면 glfwWindowShouldClose(window)가 true를 반환하도록 설정
 

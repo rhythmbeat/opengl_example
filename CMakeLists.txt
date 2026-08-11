@@ -19,18 +19,17 @@ if(MSVC)
     add_compile_options(/utf-8)
 endif()
 
-#set(SOURCES src/main.cpp src/shader.cpp src/common.cpp)
-#set(HEADERS src/shader.h src/common.h)
+set(SOURCES src/main.cpp src/shader.cpp src/common.cpp src/program.cpp src/context.cpp src/buffer.cpp src/vertex_layout.cpp)
+set(HEADERS src/shader.h src/common.h src/program.h src/context.h src/buffer.h src/vertex_layout.h)
 
-#add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
-
-add_executable(${PROJECT_NAME}
-   src/main.cpp
-   src/common.cpp
-   src/shader.cpp
-   src/shader.h
-   src/common.h)
+#add_executable(${PROJECT_NAME}
+#   src/main.cpp
+#   src/common.cpp
+#   src/shader.cpp
+#   src/shader.h
+#   src/common.h)
 
 include(Dependency.cmake)
 
