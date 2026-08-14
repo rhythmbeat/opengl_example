@@ -19,8 +19,8 @@ if(MSVC)
     add_compile_options(/utf-8)
 endif()
 
-set(SOURCES src/main.cpp src/shader.cpp src/common.cpp src/program.cpp src/context.cpp src/buffer.cpp src/vertex_layout.cpp)
-set(HEADERS src/shader.h src/common.h src/program.h src/context.h src/buffer.h src/vertex_layout.h)
+set(SOURCES src/main.cpp src/shader.cpp src/common.cpp src/program.cpp src/context.cpp src/buffer.cpp src/vertex_layout.cpp src/image.cpp)
+set(HEADERS src/shader.h src/common.h src/program.h src/context.h src/buffer.h src/vertex_layout.h src/image.h)
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 

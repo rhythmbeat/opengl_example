@@ -1,5 +1,5 @@
 #include "context.h"
-
+#include "image.h"
 ContextUPtr Context::Create()   {
     auto context = ContextUPtr(new Context());
     if (!context->Init())
@@ -8,13 +8,20 @@ ContextUPtr Context::Create()   {
     }
 
     bool Context::Init() {
-        
+
     float vertices[] = {
-        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // top right, red
-        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom right, green
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom left, blue
-        -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, // top left, yellow
+        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
     };
+        
+    // float vertices[] = {
+    //     0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // top right, red
+    //     0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom right, green
+    //     -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom left, blue
+    //     -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, // top left, yellow
+    // };
     uint32_t indices[] = { // note that we start from 0!
     0, 1, 3, // first triangle
     1, 2, 3, // second triangle
@@ -65,9 +72,26 @@ ContextUPtr Context::Create()   {
 
         glClearColor(0.0f, 0.1f, 0.2f, 0.0f);
 
-        
+        auto image = Image::Load("./image/container.jpg");
+        if (!image) 
+            return false;
+        SPDLOG_INFO("image: {}x{}, {} channels", image->GetWidth(), image->GetHeight(), image->GetChannelCount());
+
+        glGenTextures(1, &m_texture);
+        glBindTexture(GL_TEXTURE_2D, m_texture);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);//이미지가 많이 축소되었을 때 쓰는 필터, linear로 지정
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);//이미지가 많이 확대되었을 때 쓰는 필터, linear로 지정
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);//텍스쳐가 0, 1 좌표를 벗어났을 때 어떻게 처리할지 지정, GL_CLAMP_TO_EDGE는 좌표가 0보다 작으면 0, 1보다 크면 1로 처리함.
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);//텍스쳐 좌표계에서 S축과 T축이 있음, S축은 x축, T축은 y축임. GL_CLAMP_TO_EDGE는 제일 모서리에 있는 픽셀 색상을 그대로 사용함. GL_REPEAT는 좌표를 0~1 범위로 나눈 나머지 값을 사용함. GL_MIRRORED_REPEAT는 좌표를 0~1 범위로 나눈 몫이 짝수면 그대로, 홀수면 1에서 뺀 값을 사용함.
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+            image->GetWidth(), image->GetHeight(), 0,
+            GL_RGB, GL_UNSIGNED_BYTE, image->GetData());
+                
         return true;
     }
+
+    
 
 void Context::Render() {
     glClear(GL_COLOR_BUFFER_BIT);
