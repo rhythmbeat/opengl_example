@@ -73,16 +73,20 @@ ContextUPtr Context::Create()   {
 
         glClearColor(0.0f, 0.1f, 0.2f, 0.0f);
 
-        // auto image = Image::Load("./image/container.jpg");
-        // if (!image) 
-        //     return false;
-        // SPDLOG_INFO("image: {}x{}, {} channels", image->GetWidth(), image->GetHeight(), image->GetChannelCount());
-        auto image = Image::Create(512, 512);
-        image->SetCheckImage(16, 16);
+        auto image = Image::Load("./image/container.jpg");
+        if (!image) 
+             return false;
 
+
+         SPDLOG_INFO("image: {}x{}, {} channels", 
+            image->GetWidth(), image->GetHeight(), image->GetChannelCount());
+        
 
         m_texture = Texture::CreateFromImage(image.get());//유니크포인터로부터 그냥 로우포인터를 가져오는 방법은 .get(); .하면 유니크포인터에 들어있는 기본 함수를 호출할 수 있다는데 애초에 유니크 포인터에 get() 등등이 들어있다는 소리인가?
-       /* glGenTextures(1, &m_texture);
+        
+        auto image2 = Image::Load("./image/awesomeface.png");
+        m_texture2 = Texture::CreateFromImage(image2.get());
+        /* glGenTextures(1, &m_texture);
         glBindTexture(GL_TEXTURE_2D, m_texture);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);//이미지가 많이 축소되었을 때 쓰는 필터, linear로 지정
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);//이미지가 많이 확대되었을 때 쓰는 필터, linear로 지정
@@ -93,6 +97,14 @@ ContextUPtr Context::Create()   {
             image->GetWidth(), image->GetHeight(), 0,
             GL_RGB, GL_UNSIGNED_BYTE, image->GetData());*/ //texture.cpp에서 Texture 클래스의 SetTextureFromImage 함수로 대체
                 
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, m_texture->Get());
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, m_texture2->Get());
+
+        m_program->Use();
+        glUniform1i(glGetUniformLocation(m_program->Get(), "tex"), 0);
+        glUniform1i(glGetUniformLocation(m_program->Get(), "tex2"), 1);
         return true;
     }
 
