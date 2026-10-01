@@ -10,10 +10,11 @@ ContextUPtr Context::Create()   {
     bool Context::Init() {
 
     float vertices[] = {
-        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        0.5f, 0.5f, 0.0f,    1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
+        0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+        -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
+        -0.5f, 0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f,
+        //위치좌표(x,y,z)     정점색상(r,g,b)       텍스쳐좌표(u,v)
     };
         
     // float vertices[] = {
@@ -105,6 +106,31 @@ ContextUPtr Context::Create()   {
         m_program->Use();
         glUniform1i(glGetUniformLocation(m_program->Get(), "tex"), 0);
         glUniform1i(glGetUniformLocation(m_program->Get(), "tex2"), 1);
+
+        // // 위치 (1, 0, 0)의 점. 동차좌표계 사용해서 마지막 w가 1.0f
+        // glm::vec4 vec(1.0f,  0.0f, 0.0f, 1.0f); //여기서 vec4는 클래스, 뒤는 클래스에 인수값을 집어넣는 것뿐
+        // // 단위행렬 기준 (1, 1, 0)만큼 평행이동하는 행렬(trans)
+        // auto trans = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+        // // 단위행렬 기준 z축으로 90도만큼 회전하는 행렬
+        // auto rot = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        // // 단위행렬 기준 모든 축에 대해 3배율 확대하는 행렬
+        // auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+        // // 확대 -> 회전 -> 평행이동 순으로 점에 선형 변환 적용
+        // vec = trans * rot * scale * vec; //vec에 붙어있는 순서대로 계산, scale, rot, trans
+        // //(3,0,0)=>(0,3,0)=>(1,4,0)
+        // SPDLOG_INFO("transformed vec: [{}, {}, {}]", vec.x, vec.y, vec.z);
+
+        //0.5배 축소후 z축으로 90도 회전하는 행렬
+        auto transform = glm::rotate(
+            glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)),
+            glm::radians(60.0f), glm::vec3(0.0f, 0.0f, 1.0f)
+            );
+        //auto transform=glm::translate(glm::mat4(1.0f), glm::vec3(0.3f, 0.2f, 0.0f));
+        /*glm::vec4 myOffset(0.3f, 0.2f, 0.0f, 1.0f);
+        auto transform=glm::translate(glm::mat4(1.0f), glm::vec3(myOffset));*/
+        auto transformLoc = glGetUniformLocation(m_program->Get(), "transform");//"transform"이라는 변수가 해당하는 위치를 알려달라
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));//value_ptr은 floating point 값 16개를 담고있는 transform 클래스?변수?에서 첫번째 값이 저장되어 있는 주소값을 리턴하는 함수, 덕분에 16개의 주소를 줄줄이 얻어서 gpu에 넘겨줄 수 있다
+
         return true;
     }
 
