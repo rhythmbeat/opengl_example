@@ -10,29 +10,51 @@ ContextUPtr Context::Create()   {
     bool Context::Init() {
 
     float vertices[] = {
-        0.5f, 0.5f, 0.0f,    1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
-        0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
-        -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
-        -0.5f, 0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f,
-        //위치좌표(x,y,z)     정점색상(r,g,b)       텍스쳐좌표(u,v)
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
+
+        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+        0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f, 0.0f, 1.0f,
+
+        -0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+
+        0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+        0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+        0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
+        0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+
+        -0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
+        0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f,
     };
-        
-    // float vertices[] = {
-    //     0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // top right, red
-    //     0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom right, green
-    //     -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom left, blue
-    //     -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, // top left, yellow
-    // };
-    uint32_t indices[] = { // note that we start from 0!
-    0, 1, 3, // first triangle
-    1, 2, 3, // second triangle
+
+    uint32_t indices[] = {
+        0,  2,  1,  2,  0,  3,
+        4,  5,  6,  6,  7,  4,
+        8,  9, 10, 10, 11,  8,
+        12, 14, 13, 14, 12, 15,
+        16, 17, 18, 18, 19, 16,
+        20, 22, 21, 22, 20, 23,
     };
 
     m_vertexLayout = VertexLayout::Create();
     /*glGenVertexArrays(1, &m_vertexArrayObject);
     glBindVertexArray(m_vertexArrayObject);*/
 
-    m_vertexBuffer = Buffer::CreateWithData(GL_ARRAY_BUFFER, GL_STATIC_DRAW, vertices, sizeof(float) * 32);
+    m_vertexBuffer = Buffer::CreateWithData(GL_ARRAY_BUFFER, GL_STATIC_DRAW, vertices, sizeof(float) * 120);
 
     /*glGenBuffers(1, &m_vertexBuffer);// Generate a vertex buffer object
     glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);//GL_ARRAY_BUFFER 얘를 편의상 VBO라고 부르기도함.(정확히는 m_vertexBuffer의 키가 가리키는 주소가 VBO),data를 넣을때는 GL_ARRAY_BUFFER라는 통로를 연결한 뒤에 넣음, 즉 GL_ARRAY_BUFFER는 VBO를 의미하는게 아니라, VBO에 데이터를 넣을때 쓰는 용도임), 나중에 element buffer object와 index buffer object라는 이름의 VBO도 있음. 얘네는 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_vertexBuffer) 이런식으로 바인딩(연결)함.
@@ -43,13 +65,13 @@ ContextUPtr Context::Create()   {
     //vertices는 포인터라는데 무슨 소리야? vertices는 float형 배열의 시작 주소를 가리키는 포인터임.*/ //위 코드 한 줄로 대체(클래스 분리)
 
     //m_vertexLayout->SetAttrib(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
-    m_vertexLayout->SetAttrib(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0); //xyw
-    m_vertexLayout->SetAttrib(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, sizeof(float) * 3); //처음에서 3만큼 건너뛰면 rgb
-    m_vertexLayout->SetAttrib(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, sizeof(float) * 6); //처음에서 6만큼 건너뛰면 uv 텍스쳐 좌표
+    m_vertexLayout->SetAttrib(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0); //xyw
+    //m_vertexLayout->SetAttrib(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, sizeof(float) * 3); //처음에서 3만큼 건너뛰면 rgb
+    m_vertexLayout->SetAttrib(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, sizeof(float) * 3); //처음에서 6만큼 건너뛰면 uv 텍스쳐 좌표
     /*glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);*/
 
-    m_indexBuffer=Buffer::CreateWithData(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, indices, sizeof(uint32_t) * 6);
+    m_indexBuffer=Buffer::CreateWithData(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, indices, sizeof(uint32_t) * 36);
     /*glGenBuffers(1, &m_indexBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * 6, indices, GL_STATIC_DRAW);*/
@@ -104,8 +126,8 @@ ContextUPtr Context::Create()   {
         glBindTexture(GL_TEXTURE_2D, m_texture2->Get());
 
         m_program->Use();
-        glUniform1i(glGetUniformLocation(m_program->Get(), "tex"), 0);
-        glUniform1i(glGetUniformLocation(m_program->Get(), "tex2"), 1);
+        m_program->SetUniform("tex", 0);
+        m_program->SetUniform("tex2", 1);
 
         // // 위치 (1, 0, 0)의 점. 동차좌표계 사용해서 마지막 w가 1.0f
         // glm::vec4 vec(1.0f,  0.0f, 0.0f, 1.0f); //여기서 vec4는 클래스, 뒤는 클래스에 인수값을 집어넣는 것뿐
@@ -120,31 +142,60 @@ ContextUPtr Context::Create()   {
         // //(3,0,0)=>(0,3,0)=>(1,4,0)
         // SPDLOG_INFO("transformed vec: [{}, {}, {}]", vec.x, vec.y, vec.z);
 
-        //0.5배 축소후 z축으로 90도 회전하는 행렬
-        auto transform = glm::rotate(
-            glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)),
-            glm::radians(60.0f), glm::vec3(0.0f, 0.0f, 1.0f)
-            );
-        //auto transform=glm::translate(glm::mat4(1.0f), glm::vec3(0.3f, 0.2f, 0.0f));
-        /*glm::vec4 myOffset(0.3f, 0.2f, 0.0f, 1.0f);
-        auto transform=glm::translate(glm::mat4(1.0f), glm::vec3(myOffset));*/
-        auto transformLoc = glGetUniformLocation(m_program->Get(), "transform");//"transform"이라는 변수가 해당하는 위치를 알려달라
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));//value_ptr은 floating point 값 16개를 담고있는 transform 클래스?변수?에서 첫번째 값이 저장되어 있는 주소값을 리턴하는 함수, 덕분에 16개의 주소를 줄줄이 얻어서 gpu에 넘겨줄 수 있다
-
+        // x축으로 -55도 회전
+        auto model = glm::rotate(glm::mat4(1.0f), glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        // 카메라는 원점으로부터 z축 방향으로 -3만큼 떨어짐
+        auto view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
+        // 종횡비 4:3, 세로화각 45도의 원근 투영
+        auto projection = glm::perspective(glm::radians(45.0f), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.01f, 10.0f);
+        auto transform = projection * view * model;
+        m_program->SetUniform("transform", transform);//이 코드로 아래 두 줄 대체
+       /* auto transformLoc = glGetUniformLocation(m_program->Get(), "transform");//"transform"이라는 변수가 해당하는 위치를 알려달라
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));//value_ptr은 floating point 값 16개를 담고있는 transform 클래스?변수?에서 첫번째 값이 저장되어 있는 주소값을 리턴하는 함수, 덕분에 16개의 주소를 줄줄이 얻어서 gpu에 넘겨줄 수 있다*/
         return true;
     }
 
     
 
 void Context::Render() {
-    glClear(GL_COLOR_BUFFER_BIT);
 
+    std::vector<glm::vec3> cubePositions = {
+        glm::vec3( 0.0f, 0.0f, 0.0f),
+        glm::vec3( 2.0f, 5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3( 2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f, 3.0f, -7.5f),
+        glm::vec3( 1.3f, -2.0f, -2.5f),
+        glm::vec3( 1.5f, 2.0f, -2.5f),
+        glm::vec3( 1.5f, 0.2f, -1.5f),
+        glm::vec3(-1.3f, 1.0f, -1.5f),
+    };
+
+
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
 //     static float time = 0.0f;
 //   float t = sinf(time) * 0.5f + 0.5f;
 //   auto loc = glGetUniformLocation(m_program->Get(), "color");
    m_program->Use();
-//   glUniform4f(loc, t*t, 2.0f*t*(1.0f-t), (1.0f-t)*(1.0f-t), 1.0f);
-   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    auto projection = glm::perspective(glm::radians(45.0f),
+        (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.01f, 10.0f);
+    auto view = glm::translate(glm::mat4(1.0f),
+        glm::vec3(0.0f, 0.0f, -3.0f));
+
+   for (size_t i = 0; i < cubePositions.size(); i++){
+        auto& pos = cubePositions[i];
+        auto model = glm::translate(glm::mat4(1.0f), pos);
+        model = glm::rotate(model,
+            glm::radians((float)glfwGetTime() * 120.0f + 20.0f * (float)i),
+            glm::vec3(1.0f, 0.5f, 0.0f));
+        auto transform = projection * view * model;
+        m_program->SetUniform("transform", transform);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    }
 
 //   time += 0.016f;
 
