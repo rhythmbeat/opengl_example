@@ -7,6 +7,26 @@ ContextUPtr Context::Create()   {
     return std::move(context);
     }
 
+    void Context::ProcessInput(GLFWwindow* window) {
+        const float cameraSpeed = 0.05f;
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            m_cameraPos += cameraSpeed * m_cameraFront;
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            m_cameraPos -= cameraSpeed * m_cameraFront;
+
+        auto cameraRight = glm::normalize(glm::cross(m_cameraUp, -m_cameraFront));
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            m_cameraPos += cameraSpeed * cameraRight;
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+            m_cameraPos -= cameraSpeed * cameraRight;    
+
+        auto cameraUp = glm::normalize(glm::cross(-m_cameraFront, cameraRight));
+        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+            m_cameraPos += cameraSpeed * cameraUp;
+        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+            m_cameraPos -= cameraSpeed * cameraUp;
+}
+
     bool Context::Init() {
 
     float vertices[] = {
@@ -142,16 +162,7 @@ ContextUPtr Context::Create()   {
         // //(3,0,0)=>(0,3,0)=>(1,4,0)
         // SPDLOG_INFO("transformed vec: [{}, {}, {}]", vec.x, vec.y, vec.z);
 
-        // x축으로 -55도 회전
-        auto model = glm::rotate(glm::mat4(1.0f), glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        // 카메라는 원점으로부터 z축 방향으로 -3만큼 떨어짐
-        auto view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
-        // 종횡비 4:3, 세로화각 45도의 원근 투영
-        auto projection = glm::perspective(glm::radians(45.0f), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.01f, 10.0f);
-        auto transform = projection * view * model;
-        m_program->SetUniform("transform", transform);//이 코드로 아래 두 줄 대체
-       /* auto transformLoc = glGetUniformLocation(m_program->Get(), "transform");//"transform"이라는 변수가 해당하는 위치를 알려달라
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));//value_ptr은 floating point 값 16개를 담고있는 transform 클래스?변수?에서 첫번째 값이 저장되어 있는 주소값을 리턴하는 함수, 덕분에 16개의 주소를 줄줄이 얻어서 gpu에 넘겨줄 수 있다*/
+
         return true;
     }
 
@@ -182,14 +193,8 @@ void Context::Render() {
    m_program->Use();
 
     auto projection = glm::perspective(glm::radians(45.0f), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.01f, 30.0f);
-    float angle=glfwGetTime()*glm::pi<float>()*0.5f;
-    auto x=sinf(angle)*10.0f;
-    auto z=cosf(angle)*10.0f;
-    auto cameraPos = glm::vec3(x, 0.0f, z);
-    auto cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-    auto cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
-    auto view=glm::lookAt(cameraPos, cameraTarget, cameraUp);
+    auto view=glm::lookAt(m_cameraPos, m_cameraPos + m_cameraFront, m_cameraUp);
 
    for (size_t i = 0; i < cubePositions.size(); i++){
         auto& pos = cubePositions[i];
