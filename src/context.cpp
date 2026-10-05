@@ -181,10 +181,15 @@ void Context::Render() {
 //   auto loc = glGetUniformLocation(m_program->Get(), "color");
    m_program->Use();
 
-    auto projection = glm::perspective(glm::radians(45.0f),
-        (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.01f, 10.0f);
-    auto view = glm::translate(glm::mat4(1.0f),
-        glm::vec3(0.0f, 0.0f, -3.0f));
+    auto projection = glm::perspective(glm::radians(45.0f), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.01f, 30.0f);
+    float angle=glfwGetTime()*glm::pi<float>()*0.5f;
+    auto x=sinf(angle)*10.0f;
+    auto z=cosf(angle)*10.0f;
+    auto cameraPos = glm::vec3(x, 0.0f, z);
+    auto cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+    auto cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+    auto view=glm::lookAt(cameraPos, cameraTarget, cameraUp);
 
    for (size_t i = 0; i < cubePositions.size(); i++){
         auto& pos = cubePositions[i];
