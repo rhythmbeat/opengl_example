@@ -6,7 +6,9 @@
 
 void OnFramebufferSizeChange(GLFWwindow* window, int width, int height) {
     SPDLOG_INFO("framebuffer size changed: ({} x {})", width, height);
-    glViewport(0, 0, width, height);
+    auto context = (Context*)glfwGetWindowUserPointer(window);
+    //==auto context = reinterpret_cast<Context*>(glfwGetWindowUserPointer(window)); 위 c,아래 c++ 스타일
+    context->Reshape(width, height);
 }
 
 void OnKeyEvent(GLFWwindow* window,
@@ -76,7 +78,9 @@ int main(int argc, const char** argv){
             return -1;
         }
 
-    OnFramebufferSizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT);
+        glfwSetWindowUserPointer(window, context.get());
+
+        OnFramebufferSizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT);
     // 프레임버퍼 사이즈 변경 콜백 등록
     glfwSetFramebufferSizeCallback(window, OnFramebufferSizeChange);    
     glfwSetKeyCallback(window, OnKeyEvent);

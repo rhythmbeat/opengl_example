@@ -33,6 +33,24 @@ ContextUPtr Context::Create()   {
         glViewport(0, 0, m_width, m_height);
     }
 
+    void Context::MouseMove(double x, double y) {
+        static glm::vec2 prevPos = glm::vec2((float)x, (float)y);
+        auto pos = glm::vec2((float)x, (float)y);
+        auto deltaPos = pos - prevPos;
+
+        const float cameraRotSpeed = 0.8f;
+        m_cameraYaw -= deltaPos.x * cameraRotSpeed;
+        m_cameraPitch -= deltaPos.y * cameraRotSpeed;
+
+        if (m_cameraYaw < 0.0f)   m_cameraYaw += 360.0f;
+        if (m_cameraYaw > 360.0f) m_cameraYaw -= 360.0f;
+
+        if (m_cameraPitch > 89.0f)  m_cameraPitch = 89.0f;
+        if (m_cameraPitch < -89.0f) m_cameraPitch = -89.0f;
+
+        prevPos = pos;    
+ }
+
     bool Context::Init() {
 
     float vertices[] = {
