@@ -26,6 +26,18 @@ void OnKeyEvent(GLFWwindow* window,
     }
 }
 
+void OnCursorPos(GLFWwindow* window, double x, double y) {
+  auto context = (Context*)glfwGetWindowUserPointer(window);
+  context->MouseMove(x, y);
+}
+
+void OnMouseButton(GLFWwindow* window, int button, int action, int modifier) {
+  auto context = (Context*)glfwGetWindowUserPointer(window);
+  double x, y;
+  glfwGetCursorPos(window, &x, &y);
+  context->MouseButton(button, action, x, y);
+}
+
 int main(int argc, const char** argv){
     SPDLOG_INFO("Start program"); // 시작을 알리는 로그
     // glfw 라이브러리 초기화, 실패하면 에러 출력후 종료
@@ -78,13 +90,14 @@ int main(int argc, const char** argv){
             return -1;
         }
 
-        glfwSetWindowUserPointer(window, context.get());
+    glfwSetWindowUserPointer(window, context.get());
 
-        OnFramebufferSizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT);
+    OnFramebufferSizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT);
     // 프레임버퍼 사이즈 변경 콜백 등록
     glfwSetFramebufferSizeCallback(window, OnFramebufferSizeChange);    
     glfwSetKeyCallback(window, OnKeyEvent);
-
+    glfwSetCursorPosCallback(window, OnCursorPos);
+    glfwSetMouseButtonCallback(window, OnMouseButton);
 
     // glfw 루프 실행, 윈도우 close 버튼을 누르면 정상 종료
     SPDLOG_INFO("Start main loop");
