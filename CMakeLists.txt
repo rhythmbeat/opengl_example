@@ -24,7 +24,7 @@ set(HEADERS src/shader.h src/common.h src/program.h src/context.h src/buffer.h s
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
-#add_executable(${PROJECT_NAME}
+#add_executable(${PROJECT_NAME} exe파일을 만드는 명령어
 #   src/main.cpp
 #   src/common.cpp
 #   src/shader.cpp
