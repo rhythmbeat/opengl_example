@@ -3,6 +3,8 @@
 #include <spdlog/spdlog.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 void OnFramebufferSizeChange(GLFWwindow* window, int width, int height) {
     SPDLOG_INFO("framebuffer size changed: ({} x {})", width, height);
@@ -83,6 +85,15 @@ int main(int argc, const char** argv){
     SPDLOG_INFO("OpenGL Renderer: {}", reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
     SPDLOG_INFO("OpenGL Version: {}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
 
+
+    auto imguiContext = ImGui::CreateContext();
+    ImGui::SetCurrentContext(imguiContext);
+    ImGui_ImplGlfw_InitForOpenGL(window, false);
+    ImGui_ImplOpenGL3_Init();
+    ImGui_ImplOpenGL3_CreateFontsTexture();
+    ImGui_ImplOpenGL3_CreateDeviceObjects();
+
+
     auto context = Context::Create();
         if (!context) {
             SPDLOG_ERROR("failed to create context");
@@ -103,14 +114,27 @@ int main(int argc, const char** argv){
     SPDLOG_INFO("Start main loop");
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
         context->ProcessInput(window);
         context->Render();
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);
 }
     context.reset();
     //다른방법 context = nullptr;
     //glfwWindowShouldClose(window)->윈도우가 닫혀야 하는지 여부를 반환, true이면 루프 종료, false(닫힐 이유가 없다면)이면 계속 루프
     //glfwPollEvents()->이벤트를 처리, 윈도우가 닫히는 이벤트가 발생하면 glfwWindowShouldClose(window)가 true를 반환하도록 설정
+
+    ImGui_ImplOpenGL3_DestroyFontsTexture();
+    ImGui_ImplOpenGL3_DestroyDeviceObjects();
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext(imguiContext);
+    //auto imguiContext = ImGui::CreateContext();라인들에서 구현한 순서 반대로 해제 순서 ABC -> 해제 시, cba
 
     glfwTerminate();
     return 0;

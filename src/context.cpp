@@ -1,5 +1,6 @@
 #include "context.h"
 #include "image.h"
+#include <imgui.h>//=#include "imgui.h"
 ContextUPtr Context::Create()   {
     auto context = ContextUPtr(new Context());
     if (!context->Init())
@@ -211,6 +212,11 @@ ContextUPtr Context::Create()   {
     
 
 void Context::Render() {
+
+    if (ImGui::Begin("my first ImGui window")) {
+    ImGui::Text("This is first text...");
+    }
+    ImGui::End();
 
     std::vector<glm::vec3> cubePositions = {
         glm::vec3( 0.0f, 0.0f, 0.0f),
