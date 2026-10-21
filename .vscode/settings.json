@@ -1,7 +1,8 @@
 {
     "cmake.debugConfig": {
         "cwd": "${workspaceFolder}"
-    }
+    },
+    "git.autofetch": true
     
 }//디버그할 때 cwd(current working directory)를 루트로 설정하여 셰이더 파일 등을 찾을 수 있도록 합니다.
 //디버그 모드일 때 실행되는 현재 디렉토리 위치를 workspaceFolder, 즉 현재 디렉토리 위치(루트 폴더)로 만들겠다.
