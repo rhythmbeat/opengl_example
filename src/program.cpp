@@ -7,6 +7,15 @@ ProgramUPtr Program::Create(const std::vector<ShaderPtr>& shaders) {
   return std::move(program);//program 객체를 반환할 때 std::move를 사용하여 소유권을 이전, 반환 후 program은 nullptr이 됨
 }//ProgramUPtr은 스마트 포인터이므로 함수가 끝나는 시점에 자동으로 메모리 해제
 
+ProgramUPtr Program::Create(const std::string& vertShaderFilename, const std::string& fragShaderFilename) {
+  ShaderPtr vs = Shader::CreateFromFile(vertShaderFilename, GL_VERTEX_SHADER);
+  ShaderPtr fs = Shader::CreateFromFile(fragShaderFilename, GL_FRAGMENT_SHADER);
+  if (!vs || !fs)
+    return nullptr;
+  return std::move(Create({vs, fs}));
+}
+
+
 Program::~Program() {
     if (m_program) {
       glDeleteProgram(m_program);
@@ -52,4 +61,10 @@ bool Program::Link(const std::vector<ShaderPtr>& shaders) {
 void Program::SetUniform(const std::string& name, const glm::vec3& value) const {
     auto loc = glGetUniformLocation(m_program, name.c_str());
     glUniform3fv(loc, 1, glm::value_ptr(value));
+}
+
+void Program::SetUniform(const std::string& name,
+  const glm::vec4& value) const {
+  auto loc = glGetUniformLocation(m_program, name.c_str());
+  glUniform4fv(loc, 1, glm::value_ptr(value));
 }
