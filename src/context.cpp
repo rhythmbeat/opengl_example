@@ -183,7 +183,10 @@ ContextUPtr Context::Create()   {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
             image->GetWidth(), image->GetHeight(), 0,
             GL_RGB, GL_UNSIGNED_BYTE, image->GetData());*/ //texture.cpp에서 Texture 클래스의 SetTextureFromImage 함수로 대체
-                
+
+        m_material.diffuse = Texture::CreateFromImage(Image::Load("./image/container2.png").get());
+        m_material.specular = Texture::CreateFromImage(Image::Load("./image/container2_specular.png").get());
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, m_texture->Get());
         glActiveTexture(GL_TEXTURE1);
@@ -229,19 +232,19 @@ void Context::Render() {
            m_cameraPos=glm::vec3(0.0f, 0.0f, 3.0f);
         }
         if (ImGui::CollapsingHeader("light", ImGuiTreeNodeFlags_DefaultOpen)) {
-            ImGui::DragFloat3("l.position", glm::value_ptr(m_light.position), 0.01f);
+            ImGui::DragFloat3("l.position", glm::value_ptr(m_light.position), 0.01f); 
             ImGui::ColorEdit3("l.ambient", glm::value_ptr(m_light.ambient));
             ImGui::ColorEdit3("l.diffuse", glm::value_ptr(m_light.diffuse));
             ImGui::ColorEdit3("l.specular", glm::value_ptr(m_light.specular));
         }
  
         if (ImGui::CollapsingHeader("material", ImGuiTreeNodeFlags_DefaultOpen)) {
-            ImGui::ColorEdit3("m.ambient", glm::value_ptr(m_material.ambient));
-            ImGui::ColorEdit3("m.diffuse", glm::value_ptr(m_material.diffuse));
-            ImGui::ColorEdit3("m.specular", glm::value_ptr(m_material.specular));
+            //ImGui::ColorEdit3("m.ambient", glm::value_ptr(m_material.ambient));
+            //ImGui::ColorEdit3("m.diffuse", glm::value_ptr(m_material.diffuse));
+            //ImGui::ColorEdit3("m.specular", glm::value_ptr(m_material.specular));
             ImGui::DragFloat("m.shininess", &m_material.shininess, 1.0f, 1.0f, 256.0f);
-            ImGui::Checkbox("animation", &m_animation);
         }
+        ImGui::Checkbox("animation", &m_animation);
     }
     ImGui::End();
     //Begin(), End()는 반드시 쌍으로 존재해줘야 함
@@ -285,8 +288,7 @@ void Context::Render() {
 
     // after computing projection and view matrix
         auto lightModelTransform =
-        glm::translate(glm::mat4(1.0), m_light.position) *
-        glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
+        glm::translate(glm::mat4(1.0), m_light.position) * glm::scale(glm::mat4(1.0), glm::vec3(0.2f));
         
         m_simpleProgram->Use();
         m_simpleProgram->SetUniform("color", glm::vec4(m_light.ambient + m_light.diffuse, 1.0f));
@@ -299,11 +301,14 @@ void Context::Render() {
         m_program->SetUniform("light.ambient", m_light.ambient);
         m_program->SetUniform("light.diffuse", m_light.diffuse);
         m_program->SetUniform("light.specular", m_light.specular);
-        m_program->SetUniform("material.ambient", m_material.ambient);
-        m_program->SetUniform("material.diffuse", m_material.diffuse);
-        m_program->SetUniform("material.specular", m_material.specular);
+	    m_program->SetUniform("material.diffuse", 0);
+        m_program->SetUniform("material.specular", 1);
         m_program->SetUniform("material.shininess", m_material.shininess);
 
+        glActiveTexture(GL_TEXTURE0);
+        m_material.diffuse->Bind();
+        glActiveTexture(GL_TEXTURE1);
+        m_material.specular->Bind();
 
 //   time += 0.016f;
 
