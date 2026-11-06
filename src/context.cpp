@@ -287,8 +287,7 @@ void Context::Render() {
     
 
     // after computing projection and view matrix
-        auto lightModelTransform =
-        glm::translate(glm::mat4(1.0), m_light.position) * glm::scale(glm::mat4(1.0), glm::vec3(0.2f));
+        auto lightModelTransform = glm::translate(glm::mat4(1.0), m_light.position) * glm::scale(glm::mat4(1.0), glm::vec3(0.2f));
         
         m_simpleProgram->Use();
         m_simpleProgram->SetUniform("color", glm::vec4(m_light.ambient + m_light.diffuse, 1.0f));
